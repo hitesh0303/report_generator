@@ -19,10 +19,23 @@ const Navbar = () => {
   const isPdaReportPage = location.pathname === '/create-pda-report';
   const isExpertReportPage = location.pathname === '/create-expert-report';
   const isPreviousReportsPage = location.pathname === '/previous-reports';
+  const isLandingPage = location.pathname == '/';
 
   // Toggle mobile menu
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    try {
+      // First perform the logout action
+      logout();
+      // Then navigate to landing page
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -93,10 +106,7 @@ const Navbar = () => {
           
           {/* Logout button */}
           <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
+            onClick={handleLogout}
             className="px-3 py-2 text-red-600 border border-red-600 rounded hover:bg-red-50 transition duration-300"
           >
             Logout
@@ -166,11 +176,10 @@ const Navbar = () => {
             {/* Logout button */}
             <button
               onClick={() => {
-                logout();
-                navigate('/login');
+                handleLogout();
                 setMenuOpen(false);
               }}
-              className="px-3 py-2 text-red-600 border border-red-600 rounded hover:bg-red-50 transition duration-300 flex items-center"
+              className="px-3 py-2 text-red-600 border border-red-600 rounded hover:bg-red-50 transition duration-300 flex items-center justify-center"
             >
               Logout
             </button>
