@@ -59,7 +59,7 @@ cloudinary.config({
 });
 
 // MongoDB Connection with improved error handling
-mongoose.connect('mongodb://127.0.0.1:27017/report-generator', { 
+mongoose.connect(process.env.MONGODB_URI, { 
   serverSelectionTimeoutMS: 5000 // 5 seconds
 })
 .then(() => {
