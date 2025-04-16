@@ -14,20 +14,35 @@ const app = express();
 
 // Configure CORS for production and development
 const corsOptions = {
-  origin: '*', // Temporarily allow all origins for testing
+  origin: [
+    'https://report-generator-woad.vercel.app',
+    'https://report-git.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  credentials: true,
+  credentials: false, // Changed to false since we're not using cookies
   maxAge: 86400, // 24 hours
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
 
-// Handle OPTIONS preflight requests
+// Handle OPTIONS preflight requests explicitly
 app.options('*', cors(corsOptions));
+
+// Add security headers
+app.use((req, res, next) => {
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-Frame-Options', 'DENY');
+  res.header('X-XSS-Protection', '1; mode=block');
+  res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
 
 // Increase JSON payload limits
 app.use(express.json({ 
