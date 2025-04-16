@@ -9,6 +9,9 @@ export default defineConfig({
       'react-icons': 'react-icons'
     }
   },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'https://report-git-backend.onrender.com')
+  },
   build: {
     commonjsOptions: {
       include: [/react-icons/, /node_modules/]

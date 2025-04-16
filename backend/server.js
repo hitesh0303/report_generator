@@ -14,7 +14,7 @@ const app = express();
 
 // Configure CORS for production and development
 const corsOptions = {
-  origin: ['https://report-git.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
+  origin: ['https://report-generator-woad.vercel.app', 'https://report-git.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
