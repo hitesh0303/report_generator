@@ -144,13 +144,35 @@ const styles = StyleSheet.create({
         marginTop: 15,
         padding: '0 10px'
     },
+    verticalGridContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 15,
+        padding: '0 10px'
+    },
     imageContainer: {
         width: '45%',  // Changed from 50% to allow for gap
-        height: 220,   // Reduced height to fit 2x2 grid
+        height: 240,   // Reduced height to fit 2x2 grid
         padding: 0,
         margin: 5,
         boxSizing: 'border-box',
         backgroundColor: '#ffffff'
+        
+    },
+    verticalImageContainer: {
+        width: '96%',  // Wider for vertical layout
+        height: 240,   // Same height as horizontal
+        padding: 0,
+        margin: 5,
+        boxSizing: 'border-box',
+        backgroundColor: '#ffffff',
+        borderWidth: 1,
+        borderColor: '#000',
+        borderRadius: 4,
+        overflow: 'hidden'
     },
     image1: {
         width: '100%',
@@ -738,23 +760,22 @@ export const MyDocument = ({ chartImages, data = {} }) => {
                     <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
                     <Text style={styles.t5}>Photographs of the Event:</Text>
                     
-                    <View style={styles.gridContainer}>
-                        {/* Show exactly 4 images per page */}
-                        {categorizedImages.team && categorizedImages.team.length > 0 ? (
-                            categorizedImages.team.slice(0, 4).map((image, index) => (
-                                <View key={index} style={styles.borderedImageContainer}>
+                    {categorizedImages.team && categorizedImages.team.length > 0 ? (
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.team.slice(0, 2).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
                                     <SafeImage src={image} style={styles.borderedImage} />
                                 </View>
-                            ))
-                        ) : (
-                            <Text style={styles.t66}>No Photographs of the Event</Text>
-                        )}
-                    </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={styles.t66}>No Photographs of the Event</Text>
+                    )}
                 </View>
             </Page>
             
-            {/* Photos Page - Team/Event Images (Additional images if more than 4) */}
-            {categorizedImages.team && categorizedImages.team.length > 4 && (
+            {/* Photos Page - Team/Event Images (Additional images if more than 2) */}
+            {categorizedImages.team && categorizedImages.team.length > 2 && (
                 <Page size="A4" style={styles.page}>
                     <View style={styles.headerRow}>
                         <Image style={[styles.logoImage, { height: 65, width: 70 }]} src="/pict_logo.png" />
@@ -768,22 +789,37 @@ export const MyDocument = ({ chartImages, data = {} }) => {
                         <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
                         <Text style={styles.t5}>Photographs of the Event (Continued):</Text>
                         
-                        <View style={styles.gridContainer}>
-                            {/* Show images 5-8 */}
-                            {categorizedImages.team.slice(4, 8).map((image, index) => (
-                                <View key={index} style={styles.borderedImageContainer}>
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.team.slice(2,4).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
                                     <SafeImage src={image} style={styles.borderedImage} />
                                 </View>
                             ))}
-                            
-                            {/* Add placeholders if fewer than 4 additional images */}
-                            {categorizedImages.team.length < 8 && 
-                                Array.from({ length: 8 - categorizedImages.team.length }).map((_, index) => (
-                                    <View key={`placeholder-${index}`} style={styles.borderedImageContainer}>
-                                        <SafeImage src="/Picture2.jpg" style={styles.borderedImage} />
-                                    </View>
-                                ))
-                            }
+                        </View>
+                    </View>
+                </Page>
+            )}
+            {/* Photos Page - Team/Event Images (Additional images if more than 4) */}
+            {categorizedImages.team && categorizedImages.team.length > 2 && (
+                <Page size="A4" style={styles.page}>
+                    <View style={styles.headerRow}>
+                        <Image style={[styles.logoImage, { height: 65, width: 70 }]} src="/pict_logo.png" />
+                        <Text style={[styles.t1, { marginBottom: 2 }]}>
+                            Society for Computer Technology & Research's{'\n'}
+                            <Text style={styles.title}> PUNE INSTITUTE OF COMPUTER TECHNOLOGY{'\n'} </Text>
+                            <Text style={styles.t1}>  __________________________________________________{'\n'}</Text>
+                        </Text>
+                    </View> 
+                    <View style={styles.section}>
+                        <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
+                        <Text style={styles.t5}>Photographs of the Event (Continued):</Text>
+                        
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.team.slice(4,6).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
+                                    <SafeImage src={image} style={styles.borderedImage} />
+                                </View>
+                            ))}
                         </View>
                     </View>
                 </Page>
@@ -803,20 +839,67 @@ export const MyDocument = ({ chartImages, data = {} }) => {
                     <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
                     <Text style={styles.t5}>Question set for Feedback:</Text>
                     
-                    <View style={styles.gridContainer}>
-                        {/* Show exactly 4 question set images */}
-                        {categorizedImages.speakers && categorizedImages.speakers.length > 0 ? (
-                            categorizedImages.speakers.slice(0, 4).map((image, index) => (
-                                <View key={index} style={styles.borderedImageContainer}>
+                    {categorizedImages.speakers && categorizedImages.speakers.length > 0 ? (
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.speakers.slice(0, 2).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
                                     <SafeImage src={image} style={styles.borderedImage} />
                                 </View>
-                            ))
-                        ) : (
-                            <Text style={styles.t66}>No Question Set Images</Text>
-                        )}
-                    </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={styles.t66}>No Question Set Images</Text>
+                    )}
                 </View>
             </Page>
+            
+            {categorizedImages.speakers && categorizedImages.speakers.length > 2 && (
+                <Page size="A4" style={styles.page}>
+                    <View style={styles.headerRow}>
+                        <Image style={[styles.logoImage, { height: 65, width: 70 }]} src="/pict_logo.png" />
+                        <Text style={[styles.t1, { marginBottom: 2 }]}>
+                            Society for Computer Technology & Research's{'\n'}
+                            <Text style={styles.title}> PUNE INSTITUTE OF COMPUTER TECHNOLOGY{'\n'} </Text>
+                            <Text style={styles.t1}>  __________________________________________________{'\n'}</Text>
+                        </Text>
+                    </View> 
+                    <View style={styles.section}>
+                        <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
+                        <Text style={styles.t5}>Question set for Feedback (Continued):</Text>
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.speakers.slice(2,4).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
+                                    <SafeImage src={image} style={styles.borderedImage} />
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                </Page>
+            )}    
+
+            {categorizedImages.speakers && categorizedImages.speakers.length > 2 && (
+                <Page size="A4" style={styles.page}>
+                    <View style={styles.headerRow}>
+                        <Image style={[styles.logoImage, { height: 65, width: 70 }]} src="/pict_logo.png" />
+                        <Text style={[styles.t1, { marginBottom: 2 }]}>
+                            Society for Computer Technology & Research's{'\n'}
+                            <Text style={styles.title}> PUNE INSTITUTE OF COMPUTER TECHNOLOGY{'\n'} </Text>
+                            <Text style={styles.t1}>  __________________________________________________{'\n'}</Text>
+                        </Text>
+                    </View> 
+                    <View style={styles.section}>
+                        <Text style={styles.t1}>Department of Information Technology{'\n'}</Text>
+                        <Text style={styles.t5}>Question set for Feedback (Continued):</Text>
+                        <View style={styles.verticalGridContainer}>
+                            {categorizedImages.speakers.slice(4,6).map((image, index) => (
+                                <View key={index} style={styles.verticalImageContainer}>
+                                    <SafeImage src={image} style={styles.borderedImage} />
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                </Page>
+            )}
 
             {/* Feedback Analysis Pages - Two charts per page, stacked vertically */}
             {data && data.chartImages && data.chartImages.length > 0 ? (

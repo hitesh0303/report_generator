@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaChalkboardTeacher, FaChartBar, FaUserTie, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSignInAlt } from 'react-icons/fa';
-import member1 from '../assets/member1.png';
-import member2 from '../assets/member2.png';
-import man from '../assets/man.png';
-import woman from '../assets/woman.png';
+import member1 from '../assets/image_hitesh.png';
+import member2 from '../assets/image_savani.png';
+import member3 from '../assets/image_anuja.png';
+import man from '../assets/image_sir.png';
+import woman from '../assets/image_maam.png';
 
 const LandingPage = () => {
   // Smooth scroll to section when clicking nav links
@@ -55,7 +56,7 @@ const LandingPage = () => {
     {
       name: 'Anuja Sapkal',
       role: 'Full Stack Developer',
-      image: member2,
+      image: member3,
     }
   ];
 
