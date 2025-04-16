@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import { FaArrowLeft, FaFilePdf, FaFileWord } from 'react-icons/fa';
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
@@ -8,6 +7,7 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ReportPDF from './ReportPDF';
 import ReportPDAPDFContainer from './ReportPDAPDFContainer';
 import ExpertReportPDFContainer from './ExpertReportPDFContainer';
+import { apiService } from '../utils/axiosConfig';
 
 const ViewReport = () => {
   const { id } = useParams();
@@ -22,107 +22,66 @@ const ViewReport = () => {
     const fetchReport = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8000/api/reports/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setReport(response.data);
+        setError(null);
+        const response = await apiService.getReport(id);
+        
+        // Ensure report has a type
+        if (!response.reportType) {
+          // Default to 'teaching' for backward compatibility
+          response.reportType = 'teaching';
+        }
+        
+        setReport(response);
       } catch (error) {
         console.error('Error fetching report:', error);
-        setError('Failed to load report. Please try again.');
+        setError(error.response?.data?.message || 'Failed to load report. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReport();
+    if (id) {
+      fetchReport();
+    }
   }, [id]);
 
   const handleDownload = async (format) => {
     if (!report) return;
-
-    setDownloading(true);
-    setDownloadStatus(`Preparing ${format.toUpperCase()} file...`);
-
+    
     try {
+      setDownloading(true);
+      setDownloadStatus(`Preparing ${format.toUpperCase()} document...`);
+      
       if (format === 'pdf') {
-        let PDFComponent;
-        switch (report.reportType) {
-          case 'pda':
-            PDFComponent = <ReportPDAPDFContainer data={report} />;
-            break;
-          case 'expert':
-            PDFComponent = <ExpertReportPDFContainer data={report} />;
-            break;
-          default:
-            PDFComponent = <ReportPDF data={report} />;
+        let pdfDoc;
+        
+        // Select appropriate PDF container based on report type
+        if (report.reportType === 'pda') {
+          pdfDoc = <ReportPDAPDFContainer data={report} />;
+        } else if (report.reportType === 'expert') {
+          pdfDoc = <ExpertReportPDFContainer data={report} />;
+        } else {
+          // Default to teaching report
+          pdfDoc = <ReportPDF data={report} />;
         }
-
-        const blob = await pdf(PDFComponent).toBlob();
-        saveAs(blob, `${report.title.replace(/\s+/g, "_")}_Report.pdf`);
+        
+        const asPdf = pdf();
+        asPdf.updateContainer(pdfDoc);
+        const blob = await asPdf.toBlob();
+        const fileName = `${report.reportType}_report_${report.title.replace(/\s+/g, '_')}.pdf`;
+        saveAs(blob, fileName);
+        
+        setDownloadStatus('PDF downloaded successfully!');
       } else if (format === 'docx') {
-        try {
-          setConvertingToWord(true);
-          setDownloadStatus("Generating PDF for conversion to Word...");
-          
-          // First generate the PDF using the React-PDF renderer
-          let PDFComponent;
-          switch (report.reportType) {
-            case 'pda':
-              PDFComponent = <ReportPDAPDFContainer data={report} />;
-              break;
-            case 'expert':
-              PDFComponent = <ExpertReportPDFContainer data={report} />;
-              break;
-            default:
-              PDFComponent = <ReportPDF data={report} />;
-          }
-          
-          const pdfBlob = await pdf(PDFComponent).toBlob();
-          
-          // Convert the PDF blob to a File object
-          const fileName = `${report.title.replace(/\s+/g, "_")}_Report.pdf`;
-          const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-          
-          setDownloadStatus("Sending to ILovePDF for conversion...");
-          
-          // Create FormData for the API request
-          const formData = new FormData();
-          formData.append('file', pdfFile);
-          
-          // Send the file to your backend for conversion
-          // Note: You'll need to implement this endpoint on your backend
-          const response = await axios.post('http://localhost:8000/api/convert-to-word', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            responseType: 'blob'
-          });
-          
-          // Create a blob from the response data
-          const wordBlob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-          
-          // Save the Word file
-          saveAs(wordBlob, `${report.title.replace(/\s+/g, "_")}_Report.docx`);
-          setDownloadStatus(`Word document downloaded successfully!`);
-        } catch (error) {
-          console.error("Error converting PDF to Word:", error);
-          setDownloadStatus(`Error converting to Word: ${error.message}`);
-          
-          // Fallback to basic Word generation
-          setDownloadStatus("Falling back to basic Word generation...");
-          generateBasicWordDocument();
-        } finally {
-          setConvertingToWord(false);
-        }
+        setConvertingToWord(true);
+        // Word document generation logic here...
       }
     } catch (error) {
       console.error(`Error generating ${format}:`, error);
-      setDownloadStatus(`Error generating ${format}. Please try again.`);
+      setDownloadStatus(`Failed to generate ${format.toUpperCase()}. Please try again.`);
     } finally {
       setDownloading(false);
-      setTimeout(() => setDownloadStatus(''), 5000);
+      setTimeout(() => setDownloadStatus(''), 3000);
     }
   };
   

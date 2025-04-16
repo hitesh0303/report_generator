@@ -95,9 +95,13 @@ const PreviousReports = () => {
       }
       
       console.log('Fetching report data from server...');
-      const response = await apiService.getReport(reportId);
+      const reportData = await apiService.getReport(reportId);
       
-      const reportData = response.data;
+      // Ensure report has a type
+      if (!reportData.reportType) {
+        reportData.reportType = 'teaching'; // Default to teaching for backward compatibility
+      }
+      
       const isPDA = reportData.reportType === 'pda';
       const isExpert = reportData.reportType === 'expert';
       
@@ -111,152 +115,31 @@ const PreviousReports = () => {
         chartImagesCount: reportData.chartImages?.length || 0
       });
       
-      // For PDA reports, ensure we have a proper categorizedImages structure
-      if (isPDA) {
-        // If the report doesn't have categorizedImages but has a flat images array,
-        // convert it to the new structure for backward compatibility
-        if (!reportData.categorizedImages && reportData.images) {
-          console.log('Converting legacy PDA report format to categorized images format');
-          reportData.categorizedImages = {
-            team: [],
-            winners: [],
-            certificates: [],
-            general: reportData.images || [] // Put all images in general category
-          };
-        } else if (!reportData.categorizedImages) {
-          // If no images at all, initialize with empty arrays
-          reportData.categorizedImages = {
-            team: [],
-            winners: [],
-            certificates: [],
-            general: []
-          };
-        }
-        
-        console.log('PDA report categorized images:', {
-          team: reportData.categorizedImages.team?.length || 0,
-          winners: reportData.categorizedImages.winners?.length || 0,
-          certificates: reportData.categorizedImages.certificates?.length || 0,
-          general: reportData.categorizedImages.general?.length || 0
-        });
-      }
-      
-      // For Expert reports, ensure we have a proper categorizedImages structure
-      if (isExpert) {
-        // If the report doesn't have categorizedImages but has a flat images array,
-        // convert it to the new structure for backward compatibility
-        if (!reportData.categorizedImages && reportData.images) {
-          console.log('Converting legacy Expert report format to categorized images format');
-          reportData.categorizedImages = {
-            team: [],
-            speakers: [],
-            certificates: [],
-            general: reportData.images || [] // Put all images in general category
-          };
-        } else if (!reportData.categorizedImages) {
-          // If no images at all, initialize with empty arrays
-          reportData.categorizedImages = {
-            team: [],
-            speakers: [],
-            certificates: [],
-            general: []
-          };
-        }
-        
-        console.log('Expert report categorized images:', {
-          team: reportData.categorizedImages.team?.length || 0,
-          speakers: reportData.categorizedImages.speakers?.length || 0,
-          certificates: reportData.categorizedImages.certificates?.length || 0,
-          general: reportData.categorizedImages.general?.length || 0
-        });
-      }
-      
       if (format === 'pdf') {
+        console.log('Starting PDF generation');
+        setDownloadStatus('Generating PDF...');
+        
         try {
-          console.log('Starting PDF generation process');
-          setDownloadStatus('Generating PDF document...');
-          
-          // Log chart image information for debugging
-          if (reportData.chartImages) {
-            console.log(`Chart images available: ${reportData.chartImages.length}`);
-            
-            // More detailed inspection of chart images format
-            if (reportData.chartImages.length > 0) {
-              // Check first chart image format
-              const firstImage = reportData.chartImages[0];
-              
-              if (typeof firstImage === 'string') {
-                console.log('Chart image format: string');
-                console.log('First chart image data starts with:', firstImage.substring(0, 50) + '...');
-              } else if (typeof firstImage === 'object') {
-                console.log('Chart image format: object with keys:', Object.keys(firstImage));
-                if (firstImage.src) {
-                  console.log('Image src property starts with:', firstImage.src.substring(0, 50) + '...');
-                }
-                if (firstImage.title) {
-                  console.log('Image title:', firstImage.title);
-                }
-              } else {
-                console.log('Chart image format: unknown', typeof firstImage);
-              }
-              
-              // Ensure all chart images have the expected structure
-              reportData.chartImages = reportData.chartImages.map(img => {
-                if (typeof img === 'string' && img.startsWith('data:image/')) {
-                  // Convert string image data to object format
-                  return { src: img, title: 'Chart' };
-                } else if (typeof img === 'object' && img.src) {
-                  // Keep object format but ensure title exists
-                  return { ...img, title: img.title || 'Chart' };
-                } else {
-                  // Invalid format, log it
-                  console.log('Invalid chart image format:', typeof img, img);
-                  return null;
-                }
-              }).filter(img => img !== null); // Remove any null images
-              
-              console.log(`Processed ${reportData.chartImages.length} valid chart images`);
-            }
-          } else {
-            console.log('No chart images in the report data');
-            reportData.chartImages = []; // Ensure it's an empty array not undefined
-          }
-          
-          // Create the PDF document directly based on report type
           let pdfDoc;
+          
+          // Select appropriate PDF container based on report type
           if (isPDA) {
             pdfDoc = <ReportPDAPDFContainer data={reportData} />;
           } else if (isExpert) {
-            pdfDoc = <ExpertReportPDFContainer data={reportData} chartImages={reportData.chartImages} />;
+            pdfDoc = <ExpertReportPDFContainer data={reportData} />;
           } else {
             pdfDoc = <ReportPDF data={reportData} />;
           }
           
-          console.log('PDF component created, generating blob...');
           const asPdf = pdf();
           asPdf.updateContainer(pdfDoc);
           const blob = await asPdf.toBlob();
-          console.log('PDF blob created successfully');
-          
-          // Create a filename with appropriate prefix
-          let filePrefix = 'Teaching_Report_';
-          if (isPDA) {
-            filePrefix = 'PDA_Report_';
-          } else if (isExpert) {
-            filePrefix = 'Expert_Session_';
-          }
-          
-          const fileName = `${filePrefix}${reportData.title.replace(/\s+/g, "_")}.pdf`;
-          console.log(`Saving PDF as: ${fileName}`);
-          
-          // Save the file
+          const fileName = `${reportData.reportType}_report_${reportData.title.replace(/\s+/g, '_')}.pdf`;
           saveAs(blob, fileName);
-          console.log('File saved');
           
-          // Show success message
+          console.log('PDF generated and downloaded successfully');
           setDownloadStatus('PDF downloaded successfully!');
           
-          // Clear the status after a delay
           setTimeout(() => {
             setDownloading(false);
             setDownloadStatus('');
