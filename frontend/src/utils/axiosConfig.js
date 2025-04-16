@@ -7,12 +7,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 // Create an axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds
+  timeout: 15000, // 15 seconds
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
-  },
-  withCredentials: true // Important for CORS with credentials
+  }
 });
 
 // Request interceptor to add token to all requests
@@ -22,9 +21,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+
     // Log the request for debugging
     console.log('Request:', {
-      url: config.url,
+      url: `${config.baseURL}${config.url}`,
       method: config.method,
       headers: config.headers,
       data: config.data
@@ -43,30 +43,44 @@ api.interceptors.response.use(
     // Log successful response for debugging
     console.log('Response:', {
       status: response.status,
-      data: response.data
+      data: response.data,
+      url: response.config.url
     });
     return response;
   },
   (error) => {
-    // Log error response for debugging
-    console.error('API Error:', {
+    // Log detailed error information
+    console.error('API Error Details:', {
       message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      headers: error.config?.headers
     });
-    
-    // Authentication errors
-    if (error.response && error.response.status === 401) {
-      console.error('Authentication error - redirecting to login');
-      localStorage.removeItem('token');
+
+    // Network or timeout errors
+    if (!error.response) {
+      const errorMessage = error.code === 'ECONNABORTED' 
+        ? 'Request timed out. Please try again.'
+        : 'Network error. Please check your connection and try again.';
       
-      // Show notification to user
-      if (window) {
-        window.alert('Your session has expired. Please log in again.');
+      return Promise.reject({
+        response: {
+          status: 0,
+          data: { message: errorMessage }
+        }
+      });
+    }
+
+    // Authentication errors
+    if (error.response.status === 401) {
+      localStorage.removeItem('token');
+      if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -79,17 +93,48 @@ export const apiService = {
       const response = await api.post('/api/login', credentials);
       return response.data;
     } catch (error) {
-      console.error('Login Error:', error.response?.data || error.message);
+      console.error('Login Error:', {
+        message: error.response?.data?.message || error.message,
+        status: error.response?.status
+      });
       throw error;
     }
   },
   
   register: async (userData) => {
     try {
-      const response = await api.post('/api/register', userData);
+      console.log('Starting registration process...');
+      const response = await api.post('/api/register', userData, {
+        timeout: 20000, // 20 second timeout for registration
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        validateStatus: function (status) {
+          return status >= 200 && status < 500; // Accept all responses to handle them properly
+        }
+      });
+      
+      console.log('Registration response received:', {
+        status: response.status,
+        data: response.data
+      });
+      
+      if (response.status >= 400) {
+        throw {
+          response: {
+            status: response.status,
+            data: response.data
+          }
+        };
+      }
+      
       return response.data;
     } catch (error) {
-      console.error('Registration Error:', error.response?.data || error.message);
+      console.error('Registration Error:', {
+        message: error.response?.data?.message || error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
       throw error;
     }
   },
