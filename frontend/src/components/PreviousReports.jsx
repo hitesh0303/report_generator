@@ -8,6 +8,7 @@ import { FaDownload, FaFilePdf, FaFileWord, FaArrowLeft, FaChalkboardTeacher, Fa
 import ReportPDF from "./ReportPDF";
 import ReportPDAPDFContainer from "./ReportPDAPDFContainer";
 import ExpertReportPDFContainer from "./ExpertReportPDFContainer";
+import { apiService } from "../utils/axiosConfig";
 
 const PreviousReports = () => {
   const [reports, setReports] = useState([]);
@@ -35,14 +36,12 @@ const PreviousReports = () => {
         return;
       }
       
-      const response = await axios.get('http://localhost:8000/api/reports', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiService.getReports();
       
-      console.log('API Response:', response.data); // Debug API response
+      console.log('API Response:', response); // Debug API response
       // Map reports and add a type field (Default to 'teaching' for existing reports)
-      const processedReports = Array.isArray(response.data) 
-        ? response.data.map(report => {
+      const processedReports = Array.isArray(response) 
+        ? response.map(report => {
             // For backward compatibility assign a report type if not present
             const reportType = report.reportType || 'teaching';
             
@@ -96,9 +95,7 @@ const PreviousReports = () => {
       }
       
       console.log('Fetching report data from server...');
-      const response = await axios.get(`http://localhost:8000/api/reports/${reportId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiService.getReport(reportId);
       
       const reportData = response.data;
       const isPDA = reportData.reportType === 'pda';
@@ -548,9 +545,7 @@ const PreviousReports = () => {
         throw new Error('Authentication token not found. Please log in again.');
       }
       
-      await axios.delete(`http://localhost:8000/api/reports/${reportId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await apiService.deleteReport(reportId);
       
       setDeleteStatus('Report successfully deleted');
       // Refresh the reports list

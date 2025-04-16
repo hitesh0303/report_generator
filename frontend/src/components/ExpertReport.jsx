@@ -718,162 +718,80 @@ const ExpertReportFull = () => {
   // Save report to database
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setSaving(true);
+    setStatusMessage("Saving report...");
+
     try {
-      setSaving(true);
-      setStatusMessage('Saving your report...');
+      const token = localStorage.getItem("token");
       
-      // Check if charts need to be captured
-      if (chartData.length > 0 && (!formData.chartImages || formData.chartImages.length === 0)) {
+      // Check if we have chart data but no captured chart images
+      if (chartData.length > 0 && (!chartImages || chartImages.length === 0)) {
         console.log("Charts not captured yet, attempting to capture before saving");
         setStatusMessage("Capturing charts before saving report...");
         await captureCharts();
       }
-      
-      // Create a clean report data object
-      let reportDataToSave = { ...formData };
-      
-      // Optimize chart images to reduce payload size
-      if (reportDataToSave.chartImages && reportDataToSave.chartImages.length > 0) {
-        console.log(`Optimizing ${reportDataToSave.chartImages.length} chart images before save`);
-        
-        // Limit the number of chart images (keep only the first 10)
-        if (reportDataToSave.chartImages.length > 10) {
-          console.log(`Limiting chart images from ${reportDataToSave.chartImages.length} to 10`);
-          reportDataToSave.chartImages = reportDataToSave.chartImages.slice(0, 10);
-        }
-        
-        // Resize base64 images to reduce payload size
-        reportDataToSave.chartImages = reportDataToSave.chartImages.map(img => {
-          // If the image is already a URL (not base64), keep it as is
-          if (typeof img.src === 'string' && !img.src.startsWith('data:')) {
-            return img;
-          }
-          
-          // Keep metadata but compress the image
-          return {
-            ...img,
-            // Set a quality parameter to reduce size (note: we keep the src as is to avoid corrupting the data)
-            title: img.title // Keep the title to identify the chart
-          };
-        });
+
+      // Create a clean report data object from formData
+      const reportDataToSave = {
+        ...formData,
+        chartImages: chartImages || [], // Use local base64 images for charts
+        reportType: 'expert'
+      };
+
+      // Optimize chart images if needed
+      if (reportDataToSave.chartImages && reportDataToSave.chartImages.length > 10) {
+        console.warn("Too many chart images, limiting to first 10");
+        reportDataToSave.chartImages = reportDataToSave.chartImages.slice(0, 10);
       }
-      
-      // Create a deep copy of the categorized images
-      const categorizedImagesCopy = JSON.parse(JSON.stringify(reportDataToSave.categorizedImages || {}));
-      
+
       // Flatten all image URLs for backward compatibility
       const allImageUrls = [
-        ...(categorizedImagesCopy.team || []),
-        ...(categorizedImagesCopy.speakers || []),
-        ...(categorizedImagesCopy.certificates || [])
+        ...(formData.categorizedImages.team || []),
+        ...(formData.categorizedImages.winners || []),
+        ...(formData.categorizedImages.certificates || []),
+        ...(formData.categorizedImages.general || [])
       ];
-      
-      // Add type and update fields
-      reportDataToSave = {
-        ...reportDataToSave,
-        images: allImageUrls,
-        reportType: 'expert',
-        createdAt: new Date().toISOString()
-      };
-      
-      // Remove any circular references or complex objects
-      delete reportDataToSave.imageFiles;
-      
-      // Ensure excelData is properly structured
-      if (reportDataToSave.excelData && Array.isArray(reportDataToSave.excelData)) {
-        console.log(`Preparing Excel data with ${reportDataToSave.excelData.length} rows`);
-        
-        // Limit number of excel rows if needed
-        if (reportDataToSave.excelData.length > 500) {
-          console.log(`Limiting Excel data from ${reportDataToSave.excelData.length} to 500 rows`);
-          reportDataToSave.excelData = reportDataToSave.excelData.slice(0, 500);
-        }
+      reportDataToSave.images = allImageUrls;
+
+      // Log data size for debugging
+      const dataSize = JSON.stringify(reportDataToSave).length / 1024; // Size in KB
+      console.log(`Report data size: ${dataSize.toFixed(2)} KB`);
+      if (dataSize > 5000) {
+        console.warn("Warning: Large payload size may cause issues");
       }
-      
-      // Log the data size to identify potential issues
-      const dataSizeKB = JSON.stringify(reportDataToSave).length / 1024;
-      console.log(`Report data size: ${dataSizeKB.toFixed(2)} KB`);
-      
-      // Show warning if payload is large
-      if (dataSizeKB > 5000) {
-        console.warn(`Report data is very large (${dataSizeKB.toFixed(2)} KB). This may cause issues.`);
-        setStatusMessage(`Saving large report (${dataSizeKB.toFixed(2)} KB). This may take a while...`);
-      }
-      
-      console.log("Sending Expert Session report to server with:", {
-        type: reportDataToSave.reportType,
-        title: reportDataToSave.title,
-        chartImagesCount: reportDataToSave.chartImages?.length || 0,
-        imagesCount: reportDataToSave.images?.length || 0,
-        excelDataRows: reportDataToSave.excelData?.length || 0
-      });
-      
-      // Use our API service to send the data
+
       const response = await apiService.createReport(reportDataToSave);
-
-      console.log("Expert Session Report Created:", response);
-
-      // Show success message
+      
+      console.log("Expert Report Created:", response);
+      setSaving(false);
+      setStatusMessage("Report saved successfully!");
       setSaveSuccess(true);
-      setStatusMessage('Expert Session Report saved successfully! You can continue editing or generate a PDF.');
+      
+      // Reset form after successful save if needed
+      // resetForm();
       
       // Hide success message after 5 seconds
       setTimeout(() => {
         setSaveSuccess(false);
+        setStatusMessage("");
       }, 5000);
       
-      // Remove navigation logic to stay on the same page
-      console.log("Report saved - staying on the current page");
-      
     } catch (error) {
-      console.error("Error creating Expert Session report:", error);
-      let errorMessage = "Failed to save Expert Session report.";
+      console.error("Error creating expert report:", error);
+      setSaving(false);
+      
+      let errorMessage = "Failed to save expert report.";
       
       if (error.response) {
-        console.error('Server response error:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data
-        });
-
-        // Handle specific error codes
-        if (error.response.status === 401) {
-          errorMessage = "Authentication error: Your session has expired. Please log in again.";
-          // Token handling is managed by axios interceptor
-        } 
-        else if (error.response.status === 413) {
-          errorMessage = "Error: Report data is too large. Try reducing the number of images or charts.";
-        }
-        else if (error.response.status === 400) {
-          errorMessage = `Validation error: ${error.response.data.message || 'Please check your form data.'}`;
-          if (error.response.data.errors) {
-            const fieldErrors = error.response.data.errors.map(err => `${err.field}: ${err.message}`).join(', ');
-            errorMessage += ` Fields with errors: ${fieldErrors}`;
-          }
-        }
-        else if (error.response.status >= 500) {
-          errorMessage = "Server error: The server encountered an error processing your request. Please try again later or contact support.";
-          
-          if (error.response.data && error.response.data.details) {
-            console.error("Server error details:", error.response.data.details);
-          }
-        }
-        else {
         errorMessage += ` Server responded with: ${error.response.status} - ${error.response.data.message || error.response.statusText}`;
-        }
       } else if (error.request) {
-        console.error('Request error (no response):', error.request);
         errorMessage += " No response received from server. Please check your connection.";
       } else {
-        console.error('Request setup error:', error.message);
         errorMessage += ` Error: ${error.message}`;
       }
       
       setStatusMessage(errorMessage);
-    } finally {
-      setSaving(false);
-      // Remove any navigation-related code from the finally block
+      alert(errorMessage);
     }
   };
 

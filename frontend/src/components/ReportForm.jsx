@@ -13,6 +13,7 @@ import * as XLSX from 'xlsx';
 import { Chart as ChartJS } from 'chart.js';
 import html2canvas from 'html2canvas';
 import { pdf } from '@react-pdf/renderer';
+import { apiService } from "../utils/axiosConfig";
 
 const ReportForm = () => {
   const initialFormState = {
@@ -508,11 +509,9 @@ const ReportForm = () => {
       console.log("Organizer data:", reportDataToSave.organizer);
       console.log("Resource Person data:", reportDataToSave.resourcePerson);
       
-      const response = await axios.post("http://localhost:8000/api/reports", reportDataToSave, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await apiService.createReport(reportDataToSave);
 
-      console.log("Report Created:", response.data);
+      console.log("Report Created:", response);
 
       // Show success message
       setSaveSuccess(true);

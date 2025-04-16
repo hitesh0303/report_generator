@@ -1,8 +1,8 @@
 // src/components/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { FaHistory, FaChartBar, FaUserTie,FaChalkboardTeacher } from 'react-icons/fa';
+import { FaHistory, FaChartBar, FaUserTie, FaChalkboardTeacher } from 'react-icons/fa';
+import { apiService } from "../utils/axiosConfig";
 
 const Dashboard = () => {
   const [reports, setReports] = useState([]);
@@ -10,11 +10,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8000/api/reports', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setReports(response.data);
+        const response = await apiService.getReports();
+        setReports(response);
       } catch (error) {
         console.error('Error fetching reports:', error);
       }

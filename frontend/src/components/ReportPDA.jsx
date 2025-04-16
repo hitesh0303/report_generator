@@ -13,6 +13,7 @@ import * as XLSX from 'xlsx';
 import ErrorBoundary from "./ErrorBoundary";
 import { uploadMultipleBase64ToCloudinary } from '../utils/cloudinaryUtils';
 import CloudinaryUploader from './CloudinaryUploader';
+import { apiService } from "../utils/axiosConfig";
 
 const ReportPDA = () => {
   const initialFormState = {
@@ -689,11 +690,9 @@ const ReportPDA = () => {
         general: formData.categorizedImages.general?.length || 0
       });
       
-      const response = await axios.post("http://localhost:8000/api/reports", reportDataToSave, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await apiService.createReport(reportDataToSave);
 
-      console.log("PDA Report Created:", response.data);
+      console.log("PDA Report Created:", response);
 
       // Show success message
       setSaveSuccess(true);
