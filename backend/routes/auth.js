@@ -120,7 +120,7 @@ router.post('/login', async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(400).json({ 
+      return res.status(401).json({ 
         message: 'Invalid credentials',
         success: false 
       });
@@ -128,7 +128,7 @@ router.post('/login', async (req, res) => {
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(400).json({ 
+      return res.status(401).json({ 
         message: 'Invalid credentials',
         success: false 
       });
@@ -137,10 +137,13 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { userId: user._id }, 
       process.env.JWT_SECRET, 
-      { expiresIn: '24h' } // Increased token expiry to 24 hours
+      { expiresIn: '24h' }
     );
 
-    res.status(200).json({ 
+    // Set response headers for CORS
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    return res.status(200).json({ 
       message: 'Login successful',
       success: true,
       token,
@@ -160,7 +163,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generic error response
-    res.status(500).json({ 
+    return res.status(500).json({ 
       message: 'Error logging in',
       success: false,
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'

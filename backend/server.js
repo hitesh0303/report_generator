@@ -23,24 +23,30 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  credentials: false, // Changed to false since we're not using cookies
+  credentials: true, // Changed to true to allow credentials
   maxAge: 86400, // 24 hours
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
-// Apply CORS middleware
+// Apply CORS middleware before routes
 app.use(cors(corsOptions));
 
-// Handle OPTIONS preflight requests explicitly
+// Enable pre-flight requests for all routes
 app.options('*', cors(corsOptions));
 
-// Add security headers
+// Add security headers with proper CORS settings
 app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (corsOptions.origin.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('X-Content-Type-Options', 'nosniff');
   res.header('X-Frame-Options', 'DENY');
   res.header('X-XSS-Protection', '1; mode=block');
-  res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   next();
 });
 
