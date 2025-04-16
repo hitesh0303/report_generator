@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 // Base URL for the API
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Create an axios instance with default config
 const api = axios.create({
@@ -10,7 +10,9 @@ const api = axios.create({
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
-  }
+    'Accept': 'application/json'
+  },
+  withCredentials: true // Important for CORS with credentials
 });
 
 // Request interceptor to add token to all requests
@@ -20,18 +22,38 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    // Log the request for debugging
+    console.log('Request:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    });
     return config;
   },
   (error) => {
+    console.error('Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response for debugging
+    console.log('Response:', {
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   (error) => {
-    console.error('API Error:', error);
+    // Log error response for debugging
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
     
     // Authentication errors
     if (error.response && error.response.status === 401) {
@@ -41,7 +63,6 @@ api.interceptors.response.use(
       // Show notification to user
       if (window) {
         window.alert('Your session has expired. Please log in again.');
-        // Use window.location for navigation since we can't use useNavigate outside of components
         window.location.href = '/login';
       }
     }
@@ -54,8 +75,23 @@ api.interceptors.response.use(
 export const apiService = {
   // Auth endpoints
   login: async (credentials) => {
-    const response = await api.post('/api/login', credentials);
-    return response.data;
+    try {
+      const response = await api.post('/api/login', credentials);
+      return response.data;
+    } catch (error) {
+      console.error('Login Error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+  
+  register: async (userData) => {
+    try {
+      const response = await api.post('/api/register', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Registration Error:', error.response?.data || error.message);
+      throw error;
+    }
   },
   
   // Reports endpoints
