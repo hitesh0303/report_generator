@@ -11,7 +11,18 @@ const authRoutes = require('./routes/auth');
 const reportRoutes = require('./routes/report');
 
 const app = express();
-app.use(cors());
+
+// Configure CORS for production and development
+const corsOptions = {
+  origin: ['https://report-git.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
+};
+
+app.use(cors(corsOptions));
 
 // Increase JSON payload limits
 app.use(express.json({ 
