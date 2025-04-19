@@ -57,33 +57,38 @@ const AuthenticationPage = () => {
       console.error("Authentication error:", error);
   
       if (error.response) {
-        if (error.response.status === 400) {
+        const status = error.response.status;
+        const backendMsg = error.response.data?.message || error.message;
+  
+        if (status === 400) {
           setErrorMessage(
             isSignup
-              ? "Invalid signup data. Minimum length of the password should be 8."
-              : "Invalid login credentials. Please check your email and password."
+              ? backendMsg.includes("format")
+                ? "Invalid email format. Please enter a valid email."
+                : backendMsg.includes("exists")
+                ? "An account with this email already exists."
+                : "Signup failed. Please fill all required fields correctly."
+              : "Login failed. Please check your email and password."
           );
-        } else if (error.response.status === 401 || error.response.status === 403) {
+        } else if (status === 401 || status === 403) {
           setErrorMessage(
             isSignup
-              ? "Signup not authorized. Please contact support."
-              : "Unauthorized login attempt. Please check your credentials."
+              ? "Signup not allowed. Please contact support."
+              : "Incorrect password. Please try again."
           );
-        } else if (error.response.status === 404) {
+        } else if (status === 404) {
           setErrorMessage("Server endpoint not found. Please contact support.");
-        } else if (error.response.status >= 500) {
-          setErrorMessage("Server error. Please try again later.");
+        } else if (status >= 500) {
+          setErrorMessage("Something went wrong on our end. Please try again later.");
         } else {
           setErrorMessage(
-            `${isSignup ? "Signup" : "Login"} failed: ${
-              error.response.data.message || error.message
-            }`
+            `${isSignup ? "Signup" : "Login"} failed: ${backendMsg}`
           );
         }
       } else if (error.request) {
-        setErrorMessage("No response from server. Please check your connection.");
+        setErrorMessage("No response from server. Please check your internet connection.");
       } else {
-        setErrorMessage(`Error: ${error.message}`);
+        setErrorMessage(`Unexpected error: ${error.message}`);
       }
     } finally {
       setIsLoading(false);
