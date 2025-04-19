@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+// Constants for Cloudinary configuration
+const CLOUDINARY_API_URL = import.meta.env.VITE_CLOUDINARY_API_URL;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
 // Convert base64 string to a Blob
 const base64ToBlob = (base64Data, contentType = '') => {
   const sliceSize = 512;
@@ -40,7 +44,7 @@ export const uploadBase64ToCloudinary = async (base64Image, title = '', setStatu
     // Prepare form data
     const formData = new FormData();
     formData.append('file', imageBlob);
-    formData.append('upload_preset', 'report_generator');
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     formData.append('folder', 'report_charts');
     
     const publicId = `chart_${title.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`;
@@ -49,10 +53,7 @@ export const uploadBase64ToCloudinary = async (base64Image, title = '', setStatu
     
     // Upload to Cloudinary
     console.log('[cloudinaryUtils] Sending request to Cloudinary API...');
-    const response = await axios.post(
-      'https://api.cloudinary.com/v1_1/darnokazg/image/upload',
-      formData
-    );
+    const response = await axios.post(CLOUDINARY_API_URL, formData);
     
     console.log('[cloudinaryUtils] Upload successful:', response.data);
     

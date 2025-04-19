@@ -8,9 +8,6 @@ const CloudinaryTest = () => {
   const [error, setError] = useState(null);
   const [errorDetails, setErrorDetails] = useState(null);
   
-  const cloudName = 'darnokazg'; // Your Cloudinary cloud name
-  const uploadPreset = 'report_generator'; // Your upload preset
-  
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -37,16 +34,13 @@ const CloudinaryTest = () => {
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
       formData.append('folder', 'cloudinary_test');
       
-      console.log('Uploading to Cloudinary with cloud name:', cloudName);
-      console.log('Using upload preset:', uploadPreset);
+      console.log('Uploading to Cloudinary with cloud name:', import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+      console.log('Using upload preset:', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
       
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        formData
-      );
+      const response = await axios.post(import.meta.env.VITE_CLOUDINARY_API_URL, formData);
       
       console.log('Upload successful:', response.data);
       setResult(response.data);
@@ -159,8 +153,8 @@ const CloudinaryTest = () => {
       </div>
       
       <div className="text-xs text-gray-500 mt-6">
-        <div>Cloud Name: {cloudName}</div>
-        <div>Upload Preset: {uploadPreset}</div>
+        <div>Cloud Name: {import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}</div>
+        <div>Upload Preset: {import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET}</div>
         <div>Folder: cloudinary_test</div>
       </div>
     </div>

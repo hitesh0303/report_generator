@@ -20,34 +20,32 @@ const AuthenticationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-    
+  
     if (isSignup && formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match!");
       return;
     }
-
+  
     try {
       setIsLoading(true);
-      
+  
       if (isSignup) {
-        // Use apiService for registration
         const response = await apiService.register(formData);
         if (response.success) {
           setErrorMessage("");
           alert("Signup successful! Please login.");
           setIsSignup(false);
         } else {
-          setErrorMessage(response.message || "Registration failed");
+          setErrorMessage(response.message || "Signup failed. Please try again.");
         }
       } else {
-        // Use apiService for login
         const data = await apiService.login({
           email: formData.email,
           password: formData.password
         });
-        
+  
         if (data.token) {
-          localStorage.setItem('token', data.token);
+          localStorage.setItem("token", data.token);
           login(data.token);
           console.log("Login successful. Token received and stored.");
           navigate("/dashboard");
@@ -57,18 +55,30 @@ const AuthenticationPage = () => {
       }
     } catch (error) {
       console.error("Authentication error:", error);
-      
+  
       if (error.response) {
         if (error.response.status === 400) {
-          setErrorMessage("Invalid credentials. Please check your email and password.");
+          setErrorMessage(
+            isSignup
+              ? "Invalid signup data. Minimum length of the password should be 8."
+              : "Invalid login credentials. Please check your email and password."
+          );
         } else if (error.response.status === 401 || error.response.status === 403) {
-          setErrorMessage("Unauthorized. Please check your credentials.");
+          setErrorMessage(
+            isSignup
+              ? "Signup not authorized. Please contact support."
+              : "Unauthorized login attempt. Please check your credentials."
+          );
         } else if (error.response.status === 404) {
           setErrorMessage("Server endpoint not found. Please contact support.");
         } else if (error.response.status >= 500) {
           setErrorMessage("Server error. Please try again later.");
         } else {
-          setErrorMessage(`Authentication failed: ${error.response.data.message || error.message}`);
+          setErrorMessage(
+            `${isSignup ? "Signup" : "Login"} failed: ${
+              error.response.data.message || error.message
+            }`
+          );
         }
       } else if (error.request) {
         setErrorMessage("No response from server. Please check your connection.");
@@ -79,6 +89,7 @@ const AuthenticationPage = () => {
       setIsLoading(false);
     }
   };
+  
 
   const handleChange = (e) => {
     setFormData({

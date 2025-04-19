@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000, // 15 seconds
+  withCredentials: true, // Enable sending cookies
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -90,7 +91,12 @@ export const apiService = {
   // Auth endpoints
   login: async (credentials) => {
     try {
-      const response = await api.post('/api/login', credentials);
+      const response = await api.post('/api/login', credentials, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Login Error:', {
@@ -106,6 +112,7 @@ export const apiService = {
       console.log('Starting registration process...');
       const response = await api.post('/api/register', userData, {
         timeout: 20000, // 20 second timeout for registration
+        withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         },
