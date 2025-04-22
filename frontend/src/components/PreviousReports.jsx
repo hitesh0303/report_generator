@@ -536,76 +536,71 @@ const PreviousReports = () => {
           </div>
           
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Download</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{filter === 'expert' ? 'Event Date' : 'Date'}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredReports.length === 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                      No {filter !== 'all' ? filter : ''} reports found
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Download</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{filter === 'expert' ? 'Event Date' : 'Date'}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
                   </tr>
-                ) : (
-                  filteredReports.map((report) => (
-                    <tr key={report._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getReportTypeIcon(report.reportType)}
-                          {getReportTypeText(report.reportType)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{report.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex space-x-3">
-                          <button
-                            onClick={() => handleDownload(report._id, 'pdf')}
-                            className="text-red-600 hover:text-red-900 flex items-center text-sm"
-                            title="Download as PDF"
-                          >
-                            <FaFilePdf className="mr-1" /> PDF
-                          </button>
-                          {/* <button
-                            onClick={() => handleDownload(report._id, 'docx')}
-                            className="text-blue-600 hover:text-blue-900 flex items-center text-sm"
-                            title="Download as Word"
-                          >
-                            <FaFileWord className="mr-1" /> Word
-                          </button> */}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {report.reportType === 'expert'
-                            ? (report.eventDate || report.date || '-')
-                            : (report.date || '-')}
-                          {report.reportType === 'expert' && report.eventTime && 
-                            <span className="ml-1 text-xs text-gray-400">({report.eventTime})</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleDeleteReport(report._id)}
-                          className="text-red-600 hover:text-red-900 flex items-center"
-                          title="Delete Report"
-                        >
-                          <FaTrash className="mr-1" /> Delete
-                        </button>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {reports.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                        No {filter !== 'all' ? filter : ''} reports found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredReports.map((report) => (
+                      <tr key={report._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {getReportTypeIcon(report.reportType)}
+                            {getReportTypeText(report.reportType)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{report.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => handleDownload(report._id, 'pdf')}
+                              className="text-red-600 hover:text-red-900 flex items-center text-sm"
+                              title="Download as PDF"
+                            >
+                              <FaFilePdf className="mr-1" /> PDF
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {report.reportType === 'expert'
+                              ? (report.eventDate || report.date || '-')
+                              : (report.date || '-')}
+                            {report.reportType === 'expert' && report.eventTime && 
+                              <span className="ml-1 text-xs text-gray-400">({report.eventTime})</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleDeleteReport(report._id)}
+                            className="text-red-600 hover:text-red-900 flex items-center"
+                            title="Delete Report"
+                          >
+                            <FaTrash className="mr-1" /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
