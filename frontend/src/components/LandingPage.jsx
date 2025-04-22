@@ -143,13 +143,13 @@ const LandingPage = () => {
       {/* Home Section */}
       <section id="home" className="pt-24 pb-16 relative">
         {/* Background Image */}
-        <div 
+        {/* <div 
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
             backgroundImage: 'url("/image.png")',
             opacity: '1'
           }}
-        />
+        /> */}
         
         <div className="container mx-auto px-6 relative z-10">
           <h1 className="text-4xl py-10 font-bold text-center text-gray-800 mb-12">Report Generation System</h1>
