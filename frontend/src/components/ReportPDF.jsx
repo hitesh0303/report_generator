@@ -109,6 +109,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50, // Aligns the text with consistent padding
     padding : 10,
   },
+  t4: {
+    fontSize: 12,
+    textAlign: "left",
+    marginTop: 5,
+    marginBottom: 5,
+    paddingHorizontal: 50,
+    padding : 10,
+    fontWeight: "bold",
+  },
   boldText: {
     fontWeight: "bold"
   },
@@ -471,7 +480,7 @@ const ReportPDF = ({ data }) => (
             <Text style={styles.col3}><Text style={styles.t3}>1</Text>
             </Text>
             <Text style={styles.col4}>
-              <Text style={styles.t3}>
+              <Text style={styles.t4}>
                 Title of the Innovative Teaching Learning Practice: {'\n'}
               </Text>
               <Text style={styles.t3}>_____________________________________________________________________________{'\n'}</Text>
@@ -485,7 +494,7 @@ const ReportPDF = ({ data }) => (
             <Text style={styles.col3}><Text style={styles.t3}>2</Text>
             </Text>
             <Text style={styles.col4}>
-              <Text style={styles.t3}>
+              <Text style={styles.t4}>
                 Objectives: {'\n'}
               </Text>
               {data.objectives && data.objectives.length > 0 ? (
@@ -504,7 +513,7 @@ const ReportPDF = ({ data }) => (
             <Text style={styles.col3}><Text style={styles.t3}>3</Text>
             </Text>
             <Text style={styles.col4}>
-              <Text style={styles.t3}>
+              <Text style={styles.t4}>
                 Description of Activity: {'\n'}
               </Text>
               <Text style={styles.t3}>{data.description || 'No description provided.'}</Text>
@@ -542,7 +551,7 @@ const ReportPDF = ({ data }) => (
           <Text style={styles.col3}><Text style={styles.t3}>4</Text>
           </Text>
           <Text style={styles.col4}>
-            <Text style={styles.t3}>
+            <Text style={styles.t4}>
               Learning Outcomes: {'\n'}
             </Text>
             {data.learningOutcomes && data.learningOutcomes.length > 0 ? (
@@ -561,7 +570,7 @@ const ReportPDF = ({ data }) => (
           <Text style={styles.col3}><Text style={styles.t3}>5</Text>
           </Text>
           <Text style={styles.col4}>
-            <Text style={styles.t3}>
+            <Text style={styles.t4}>
               Target Students: tick appropriate {'\n'}
             </Text>
             <Text style={styles.t3}>
@@ -577,7 +586,7 @@ const ReportPDF = ({ data }) => (
           <Text style={styles.col3}><Text style={styles.t3}>6</Text>
           </Text>
           <Text style={styles.col4}>
-            <Text style={styles.t3}>
+            <Text style={styles.t4}>
               Snapshot: About event conduction/live session {'\n'}
             </Text>
           </Text>
@@ -772,7 +781,7 @@ const ReportPDF = ({ data }) => (
         <View style={styles.tableRow}>
           <Text style={styles.col3}><SafeText style={styles.t3}>{7 + (data.extraSections ? data.extraSections.length : 0)}</SafeText></Text>
           <View style={styles.col4}>
-            <SafeText style={styles.t3}>
+            <SafeText style={styles.t4}>
               Roll No wise Activity Analysis: {'\n'}
             </SafeText>
             
@@ -1008,7 +1017,7 @@ const ReportPDF = ({ data }) => (
             <View style={styles.tableRow}>
               <Text style={styles.col3}><SafeText style={styles.t3}>{8 + (data.extraSections ? data.extraSections.length : 0)}</SafeText></Text>
               <View style={styles.col4}>
-                <SafeText style={styles.t3}>
+                <SafeText style={styles.t4}>
                   Feedback Analysis: {'\n'}
                 </SafeText>
                 

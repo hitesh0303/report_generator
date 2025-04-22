@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaChalkboardTeacher, FaChartBar, FaUserTie, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSignInAlt } from 'react-icons/fa';
-import member1 from '../assets/image_hitesh.png';
-import member2 from '../assets/image_savani.png';
-import member3 from '../assets/image_anuja.png';
-import man from '../assets/image_sir.png';
-import woman from '../assets/image_maam.png';
+import member1 from '../assets/member1.png';
+import member2 from '../assets/member2.png';
+import man from '../assets/man.png';
+import woman from '../assets/woman.png';
 
 const LandingPage = () => {
   // Smooth scroll to section when clicking nav links
@@ -56,7 +55,7 @@ const LandingPage = () => {
     {
       name: 'Anuja Sapkal',
       role: 'Full Stack Developer',
-      image: member3,
+      image: member2,
     }
   ];
 
@@ -142,8 +141,17 @@ const LandingPage = () => {
       </nav>
 
       {/* Home Section */}
-      <section id="home" className="pt-24 pb-16">
-        <div className="container mx-auto px-6">
+      <section id="home" className="pt-24 pb-16 relative">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{
+            backgroundImage: 'url("/image.png")',
+            opacity: '1'
+          }}
+        />
+        
+        <div className="container mx-auto px-6 relative z-10">
           <h1 className="text-4xl py-10 font-bold text-center text-gray-800 mb-12">Report Generation System</h1>
           <div className="grid md:grid-cols-3 gap-8">
             {reportTypes.map((report, index) => (

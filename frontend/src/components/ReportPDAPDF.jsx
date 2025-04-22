@@ -541,11 +541,7 @@ const ReportPDAPDF = ({ data = {} }) => {
                             ))}
                         </>
                     )}
-                </View>
-            </Page>
 
-            <Page size="A4" style={styles.page}>
-                <View style={styles.section}>
                     <SafeText style={styles.t5}> Impact Analysis: </SafeText>
                     {impactAnalysis && impactAnalysis.length > 0 ? (
                         impactAnalysis.map((impact, index) => (
@@ -559,6 +555,24 @@ const ReportPDAPDF = ({ data = {} }) => {
                             <SafeText style={styles.t3}>4. Overall readiness for internships and placements {'\n'}</SafeText>
                         </>
                     )}
+                </View>
+            </Page>
+
+            <Page size="A4" style={styles.page}>
+                <View style={styles.section}>
+                    {/* <SafeText style={styles.t5}> Impact Analysis: </SafeText>
+                    {impactAnalysis && impactAnalysis.length > 0 ? (
+                        impactAnalysis.map((impact, index) => (
+                            <SafeText key={index} style={styles.t3}>{index + 1}. {impact}{'\n'}</SafeText>
+                        ))
+                    ) : (
+                        <>
+                            <SafeText style={styles.t3}>1. Enhanced problem solving and critical thinking {'\n'}</SafeText>
+                            <SafeText style={styles.t3}>2. Preparation for future tests for internships and placements{'\n'}</SafeText>
+                            <SafeText style={styles.t3}>3. Increased awareness of knowledge gaps{'\n'}</SafeText>
+                            <SafeText style={styles.t3}>4. Overall readiness for internships and placements {'\n'}</SafeText>
+                        </>
+                    )} */}
 
                     <SafeText style={styles.t5}> Team </SafeText>
                     {/* Use ImageGallery component for team photos */}

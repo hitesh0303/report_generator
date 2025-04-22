@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from "react-icons/fa";
 import { apiService } from "../utils/axiosConfig";
 
@@ -20,34 +21,33 @@ const AuthenticationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-  
+    
     if (isSignup && formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match!");
       return;
     }
-  
+
     try {
       setIsLoading(true);
-  
+      
       if (isSignup) {
-        const response = await apiService.register(formData);
-        if (response.success) {
-          setErrorMessage("");
-          alert("Signup successful! Please login.");
-          setIsSignup(false);
-        } else {
-          setErrorMessage(response.message || "Signup failed. Please try again.");
-        }
+        // Use direct axios call for registration since we don't have a method for it yet
+        await axios.post(`http://localhost:8000/api/register`, formData);
+        setErrorMessage("");
+        alert("Signup successful! Please login.");
+        setIsSignup(false);
       } else {
-        const data = await apiService.login({
-          email: formData.email,
-          password: formData.password
-        });
-  
+        // Use our API service for login
+        const data = await apiService.login(formData);
+        
         if (data.token) {
-          localStorage.setItem("token", data.token);
+          localStorage.setItem('token', data.token);
           login(data.token);
+          
+          // Debug token information
           console.log("Login successful. Token received and stored.");
+          
+          // Redirect to dashboard
           navigate("/dashboard");
         } else {
           setErrorMessage("Login failed: No token received from server");
@@ -55,46 +55,31 @@ const AuthenticationPage = () => {
       }
     } catch (error) {
       console.error("Authentication error:", error);
-  
+      
       if (error.response) {
-        const status = error.response.status;
-        const backendMsg = error.response.data?.message || error.message;
-  
-        if (status === 400) {
-          setErrorMessage(
-            isSignup
-              ? backendMsg.includes("format")
-                ? "Invalid email format. Please enter a valid email."
-                : backendMsg.includes("exists")
-                ? "An account with this email already exists."
-                : "Signup failed. Please fill all required fields correctly."
-              : "Login failed. Please check your email and password."
-          );
-        } else if (status === 401 || status === 403) {
-          setErrorMessage(
-            isSignup
-              ? "Signup not allowed. Please contact support."
-              : "Incorrect password. Please try again."
-          );
-        } else if (status === 404) {
+        // The server responded with an error status code
+        if (error.response.status === 400) {
+          setErrorMessage("Invalid credentials. Please check your email and password.");
+        } else if (error.response.status === 401 || error.response.status === 403) {
+          setErrorMessage("Unauthorized. Please check your credentials.");
+        } else if (error.response.status === 404) {
           setErrorMessage("Server endpoint not found. Please contact support.");
-        } else if (status >= 500) {
-          setErrorMessage("Something went wrong on our end. Please try again later.");
+        } else if (error.response.status >= 500) {
+          setErrorMessage("Server error. Please try again later.");
         } else {
-          setErrorMessage(
-            `${isSignup ? "Signup" : "Login"} failed: ${backendMsg}`
-          );
+          setErrorMessage(`Authentication failed: ${error.response.data.message || error.message}`);
         }
       } else if (error.request) {
-        setErrorMessage("No response from server. Please check your internet connection.");
+        // The request was made but no response was received
+        setErrorMessage("No response from server. Please check your connection.");
       } else {
-        setErrorMessage(`Unexpected error: ${error.message}`);
+        // Something else happened in setting up the request
+        setErrorMessage(`Error: ${error.message}`);
       }
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   const handleChange = (e) => {
     setFormData({
