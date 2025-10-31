@@ -1,67 +1,79 @@
-A web application designed to generate and manage reports using Git-based version control.
+A full-stack web application to generate and manage reports, including:
 
-📌 Overview
+PDA Reports
 
-Report Git is a full-stack web application that allows users to create, manage, and track reports with Git integration. It provides a user-friendly interface for report generation and utilizes Git for version control to ensure seamless tracking of changes.
+Expert Session Reports
 
-🛠️ Features
+Teaching Activity Reports
 
-Report Creation: Easily create new reports with a user-friendly interface.
+Users can fill forms, generate PDF reports, view previous reports, and analyze feedback. Built using React.js, Node.js, Express, and MongoDB, with Cloudinary integration for file management.
 
-Version Control: Utilizes Git to track changes and maintain version history of reports.
+Features
 
-User Authentication: Secure login and registration system for users.
+User Authentication: Register/login with JWT-based security
 
-Responsive Design: Optimized for both desktop and mobile devices.
+Report Management: Create, view, and download PDFs
 
-🚀 Technologies Used
+Feedback Analysis: Charts for visual insights
 
-Frontend: HTML, CSS, JavaScript
+Cloud Support: Upload and manage images/files
 
-Backend: Node.js
+Error Handling: Frontend and backend centralized error management
 
-Database: MongoDB
+Tech Stack
 
-Version Control: Git
+Frontend: React.js, Tailwind CSS, Axios
 
-🧪 Installation
-Prerequisites
+Backend: Node.js, Express.js, MongoDB, Mongoose
 
-Node.js
+File Storage: Cloudinary
 
-MongoDB
+PDF Generation: React components
 
-Git
+Deployment: Vercel (frontend), Render/Heroku (backend)
 
-Steps
+Project Structure
+Backend
+backend/
+├── middleware/authMiddleware.js
+├── models/Report.js, User.js
+├── routes/auth.js, report.js
+├── server.js
+├── scripts/fix-db.js
+└── package.json
 
-Clone the repository:
+Frontend
+frontend/
+├── src/components/       # Forms, PDF views, charts
+├── src/context/          # AuthContext
+├── src/utils/            # Axios & Cloudinary utilities
+├── App.jsx
+└── index.jsx
 
-git clone https://github.com/hitesh0303/report_git.git
+Installation & Usage
+
+Clone Repo
+
+git clone https://github.com/hitesh0303/report_generator/
+cd report-generator
 
 
-Navigate into the project directory:
+Backend
 
-cd report_git
-
-
-Install dependencies:
-
+cd backend
 npm install
-
-
-Start the application:
-
 npm start
 
 
-The application will be running at http://localhost:3000
-.
+Frontend
 
-📄 Usage
+cd frontend
+npm install
+npm run dev
 
-Navigate to the homepage to create a new report.
 
-Use the sidebar to view and manage existing reports.
+Environment Variables
 
-Changes to reports are automatically tracked using Git.
+Backend .env: MONGO_URI, JWT_SECRET, CLOUDINARY_*
+
+Frontend .env: VITE_API_URL, VITE_CLOUDINARY_*
